@@ -6,13 +6,14 @@ import LoginForm from './components/LoginForm';
 import RegistrationForm from './components/RegistrationForm';
 import Dashboard from './components/Dashboard';
 import { toast } from 'react-toastify';
+import { login_url, register_url, user_by_uid_url } from './utils';
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem('token') || '');
   const [user, setUser] = useState(null);
   const [spaceUsed, setSpaceUsed] = useState(0);
   const [allocatedSpace, setAllocatedSpace] = useState(0);
-  const [isRegistered, setIsRegistered] = useState(true); // Flag to toggle between login and registration
+  const [isRegistered, setIsRegistered] = useState(!0);
 
   useEffect(() => {
     if (token) {
@@ -24,7 +25,7 @@ function App() {
   const fetchUserDetails = async (userId) => {
     try {
       console.log('fetching user: ', token)
-      const response = await axios.get(`http://localhost:8080/user/${userId}`, {
+      const response = await axios.get(user_by_uid_url(userId), {
         headers: { Authorization: `Bearer ${token}` },
       });
       
@@ -43,7 +44,7 @@ function App() {
 
   const login = async (username, password) => {
     try {
-      const response = await axios.post('http://localhost:8080/login', { username, password });
+      const response = await axios.post(login_url(), { username, password });
       const jwtToken = response.data;
       if (response.status === 200) {
         toast.success('Login successful!');
@@ -63,8 +64,8 @@ function App() {
 
   const register = async (username, password, allocated_space) => {
     try {
-      await axios.post('http://localhost:8080/register', { username, password, allocated_space });
-      setIsRegistered(true);
+      await axios.post(register_url(), { username, password, allocated_space });
+      setIsRegistered(!0);
       toast.success('Registered successfully.')
     } catch (error) {
       toast.error('Registration failed.')
@@ -93,6 +94,7 @@ function App() {
           allocatedSpace={allocatedSpace}
           logout={logout}
           token={token}
+          fetchUserDetails={fetchUserDetails}
         />
       )}
     </div>

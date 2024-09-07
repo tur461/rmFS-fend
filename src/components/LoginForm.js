@@ -25,7 +25,7 @@ function LoginForm({ setIsRegistered, login }) {
         />
         <button onClick={handleLogin}>Login</button>
         <p>
-        Don't have an account? <button onClick={() => setIsRegistered(false)}>Register</button>
+        Don't have an account? <button onClick={() => setIsRegistered(!1)}>Register</button>
         </p>
     </div>
   );
