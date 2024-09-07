@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
-function FileManagement({ files, token, fetchFiles }) {
+function FileManagement({ files, token, fetchFiles, user_id }) {
     const [fileName, setFileName] = useState('');
     const [fileContent, setFileContent] = useState('');
     const [editingId, setEditingId] = useState(null);
@@ -10,9 +10,10 @@ function FileManagement({ files, token, fetchFiles }) {
     const createFile = async () => {
         if (fileName && fileContent) {
         try {
+            console.log('[FMGMT] Creating file: ', token, user_id)
             const response = await axios.post(
-            'http://localhost:8080/files',
-            { name: fileName, content: fileContent },
+            `http://localhost:8080/files/cre_by_uid/${user_id}`,
+            { filename: fileName, content: fileContent },
             { headers: { Authorization: `Bearer ${token}` } }
             );
             toast.success('File created successfully!');
@@ -30,7 +31,7 @@ function FileManagement({ files, token, fetchFiles }) {
         if (fileName && fileContent && editingId) {
         try {
             const response = await axios.put(
-            `http://localhost:8080/files/${editingId}`,
+            `http://localhost:8080/files/up_by_fid/${editingId}`,
             { name: fileName, content: fileContent },
             { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -48,7 +49,7 @@ function FileManagement({ files, token, fetchFiles }) {
 
     const deleteFile = async (id) => {
         try {
-            await axios.delete(`http://localhost:8080/files/${id}`, {
+            await axios.delete(`http://localhost:8080/files/del_by_fid/${id}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             toast.success('File deleted successfully!');

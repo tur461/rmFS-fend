@@ -3,9 +3,10 @@ import React, { useState } from 'react';
 function RegistrationForm({ setIsRegistered, register }) {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [space, setSpace] = useState(0);
 
     const handleRegister = () => {
-        register(username, password);
+        register(username, password, space);
     };
 
     return (
@@ -16,6 +17,12 @@ function RegistrationForm({ setIsRegistered, register }) {
             placeholder="Username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
+        />
+        <input
+            type="text"
+            placeholder="space"
+            value={space}
+            onChange={(e) => setSpace(+e.target.value)}
         />
         <input
             type="password"

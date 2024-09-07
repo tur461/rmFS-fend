@@ -4,14 +4,18 @@ import FileManagement from './FileManagement';
 
 function Dashboard({ user, spaceUsed, allocatedSpace, logout, token }) {
     const [files, setFiles] = useState([]);
+    
+    console.log('[Dash] user', user)
 
     useEffect(() => {
-        fetchFiles();
-    }, []);
+        user && fetchFiles();
+    }, [user]);
 
     const fetchFiles = async () => {
+        if(!user) return
         try {
-        const response = await axios.get('http://localhost:8080/files', {
+            console.log('[Dash] fetching files: ', token)
+        const response = await axios.get(`http://localhost:8080/files/get_all_by_uid/${user.id}`, {
             headers: { Authorization: `Bearer ${token}` },
         });
         setFiles(response.data);
@@ -30,7 +34,7 @@ function Dashboard({ user, spaceUsed, allocatedSpace, logout, token }) {
             <strong>Space Used:</strong> {spaceUsed} MB / {allocatedSpace} MB
         </p>
         <button onClick={logout}>Logout</button>
-        <FileManagement files={files} token={token} fetchFiles={fetchFiles} />
+        <FileManagement files={files} token={token} fetchFiles={fetchFiles} user_id={user?.id} />
         </div>
     );
 }

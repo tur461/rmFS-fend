@@ -23,10 +23,12 @@ function App() {
 
   const fetchUserDetails = async (userId) => {
     try {
+      console.log('fetching user: ', token)
       const response = await axios.get(`http://localhost:8080/user/${userId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       
+      console.log('fetch user:', response)
       if (response.status === 200) {
         setUser(response.data);
         setSpaceUsed(response.data.used_space);
@@ -48,6 +50,7 @@ function App() {
         setToken(jwtToken);
         localStorage.setItem('token', jwtToken);
         const decoded = jwtDecode(jwtToken);
+        console.log('Token: ', jwtToken, decoded)
         fetchUserDetails(decoded.sub);
       } else {
         toast.error('Err!. [code: ' + response.status +  ']');
@@ -58,9 +61,9 @@ function App() {
     }
   };
 
-  const register = async (username, password) => {
+  const register = async (username, password, allocated_space) => {
     try {
-      await axios.post('http://localhost:8080/register', { username, password });
+      await axios.post('http://localhost:8080/register', { username, password, allocated_space });
       setIsRegistered(true);
       toast.success('Registered successfully.')
     } catch (error) {
