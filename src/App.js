@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import {jwtDecode} from 'jwt-decode';
 import './App.css';
 import LoginForm from './components/LoginForm';
 import RegistrationForm from './components/RegistrationForm';
 import Dashboard from './components/Dashboard';
-import { toast } from 'react-toastify';
-import { login_url, register_url, user_by_uid_url } from './utils';
+import UserAPIService from './services/UserApiService';
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem('token') || '');
@@ -22,58 +20,27 @@ function App() {
     }
   }, [token]);
 
-  const fetchUserDetails = async (userId) => {
-    try {
-      console.log('fetching user: ', token)
-      const response = await axios.get(user_by_uid_url(userId), {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      
-      console.log('fetch user:', response)
-      if (response.status === 200) {
-        setUser(response.data);
-        setSpaceUsed(response.data.used_space);
-        setAllocatedSpace(response.data.allocated_space);
-      } else {
-        // toast.error('Err!. [code: ' + response.status +  ']');
-      }
-    } catch (error) {
-      toast.error(error.response.data)
-      console.error('Error fetching user details', error);
+  const fetchUserDetails = async userId => {
+    const data = await UserAPIService.getInst(token).fetchUserDetails(userId)
+    if(data) {
+      setUser(data);
+      setSpaceUsed(data.used_space);
+      setAllocatedSpace(data.allocated_space);
     }
   };
 
-  const login = async (username, password) => {
-    try {
-      const response = await axios.post(login_url(), { username, password });
-      const jwtToken = response.data;
-      if (response.status === 200) {
-        toast.success('Login successful!');
-        setToken(jwtToken);
-        localStorage.setItem('token', jwtToken);
-        const decoded = jwtDecode(jwtToken);
-        console.log('Token: ', jwtToken, decoded)
-        fetchUserDetails(decoded.sub);
-      } else {
-        toast.error('Err!. [code: ' + response.status +  ']');
-      }
-    } catch (error) {
-      toast.error('Login failed.')
-      toast.error(error.response.data)
-      console.error('Login failed', error);
+  const login = async (uname, pwd) => {
+    const jwt = await UserAPIService.getInst(null).doLogin(uname, pwd)
+    if(jwt) {
+      setToken(jwt);
+      localStorage.setItem('token', jwt);
+      fetchUserDetails(jwtDecode(jwt).sub);
     }
   };
 
-  const register = async (username, password, allocated_space) => {
-    try {
-      await axios.post(register_url(), { username, password, allocated_space });
-      setIsRegistered(!0);
-      toast.success('Registered successfully.')
-    } catch (error) {
-      toast.error('Registration failed.')
-      toast.error(error.response.data)
-      console.error('Registration failed', error);
-    }
+  const register = async (uname, pwd, allocSpace) => {
+    const good = await UserAPIService.getInst(null).doRegister(uname, pwd, allocSpace)
+    if(good) setIsRegistered(!0);
   };
 
   const logout = () => {

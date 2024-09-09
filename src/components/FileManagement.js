@@ -1,9 +1,9 @@
 import React, { useRef, useState } from 'react';
-import axios from 'axios';
 import { toast } from 'react-toastify';
-import { create_by_uid_url, delete_by_fid_url, download_by_fid_url, toDenom, truncFname } from '../utils';
+import { createDownloadLinkFor, toDenom, truncFname } from '../utils';
+import FileAPIService from '../services/FileApiService';
 
-function FileManagement({ files, token, fetchFiles, fetchUserDetails, user_id }) {
+function FileManagement({ files, token, fetchFiles, fetchUserDetails, userId }) {
     const fileInputRef = useRef(null);
     const [fileName, setFileName] = useState('');
     const [selectedFile, setSelectedFile] = useState(null);
@@ -14,100 +14,35 @@ function FileManagement({ files, token, fetchFiles, fetchUserDetails, user_id })
 
     const createFile = async () => {
         if (selectedFile) {
-            var loadID = null;
-            try {
-                loadID = toast.loading('Uploading..')
-                
-                console.log('[FMGMT] Uploading file: ', token, user_id);
-
-                const formData = new FormData();
-                formData.append('file', selectedFile);
-
-                await axios.post(
-                    create_by_uid_url(user_id),
-                    formData,
-                    {
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                            'Content-Type': 'multipart/form-data',
-                        },
-                    }
-                );
-                toast.update(loadID, {render: "Completed.", type: "success", isLoading: !1, autoClose: 5000});
-
-                if (fileInputRef.current) fileInputRef.current.value = '';
-
-                toast.success('File uploaded successfully!');
-                fetchFiles();
-                fetchUserDetails(user_id);
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+            
+            const good = await FileAPIService.getInst(token).uploadFile(formData, userId)
+            if(good) {
                 setFileName('');
                 setSelectedFile(null);
-
-            } catch (error) {
-                console.log('LOAD ID:', loadID)
-                toast.update(loadID, {render: "Something went wrong.", type: "error", isLoading: !1, autoClose: 5000});
-                toast.error(error.response.data);
-                console.error('Error uploading file', error);
+                fetchFiles();
+                fetchUserDetails(userId);
             }
+
+            if (fileInputRef.current) fileInputRef.current.value = '';
         } else {
             toast.error('Please select a file to upload.');
         }
     };
 
-    const deleteFile = async (id) => {
-        try {
-            await axios.delete(delete_by_fid_url(`${id}`), {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            toast.success('File deleted successfully!');
+    const deleteFile = async fileId => {
+        const good = await FileAPIService.getInst(token).delFile(fileId)
+        if(good) {
             fetchFiles();
-            fetchUserDetails(user_id)
-        } catch (error) {
-            toast.error('Failed to delete the file.');
-            toast.error(error.response.data)
-            console.error('Error deleting file', error);
+            fetchUserDetails(userId)
         }
     };
     
-    const downldFile = async (id) => {
-        var loadID = null;
-        try {
-            loadID = toast.loading('Downloading..');
-            const response = await axios.get(download_by_fid_url(id), {
-                headers: { Authorization: `Bearer ${token}` },
-                responseType: 'blob',
-            });
-            const blob = new Blob([response.data], { type: response.headers['content-type'] });
-            const link = document.createElement('a');
-            const url = window.URL.createObjectURL(blob);
-            link.href = url;
-            
-            const contentDisposition = response.headers['content-disposition'];
-            let fileName = 'downloaded_file';
-            console.log('downloaded: ', contentDisposition, response.headers);
-            if (contentDisposition && contentDisposition.includes('filename=')) {
-                const filenameMatch = contentDisposition.match(/filename="?([^"]+)"?/);
-                if (filenameMatch.length > 1) {
-                    fileName = filenameMatch[1];
-                }
-            }
-            
-            link.download = fileName;
-            document.body.appendChild(link);
-            link.click();
-            
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(link);
-           
-            toast.update(loadID, {render: "Download Completed.", type: "success", isLoading: !1, autoClose: 5000});
-
-            // fetchFiles();
-            // fetchUserDetails(user_id)
-        } catch (error) {
-            toast.update(loadID, {render: "Something went wrong.", type: "error", isLoading: !1, autoClose: 5000});
-            toast.error('Failed to download the file.');
-            toast.error(error.response.data)
-            console.error('Error deleting file', error);
+    const downloadFile = async fileId => {
+        const res = await FileAPIService.getInst(token).downloadFile(fileId)
+        if(res) {
+            createDownloadLinkFor(res.data, res.headers)
         }
     };
 
@@ -130,7 +65,7 @@ function FileManagement({ files, token, fetchFiles, fetchUserDetails, user_id })
                     <div key={file.id} className="file-item">
                         <h6>{`${truncFname(file.filename, 12)}  (${toDenom(file.size)})`}</h6>
                         <img src={`data:image/png;base64,${file.thumbnail}`} alt={file.name} className="file-thumbnail" />
-                        <button onClick={() => downldFile(file.id)}>Donwload</button>
+                        <button onClick={() => downloadFile(file.id)}>Donwload</button>
                         <button onClick={() => deleteFile(file.id)}>Delete</button>
                     </div>
                 ))}
