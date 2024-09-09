@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import FileManagement from './FileManagement';
 import { files_by_uid_url, toDenom } from '../utils';
+import { toast } from 'react-toastify';
 
 
 function Dashboard({ user, spaceUsed, allocatedSpace, logout, token, fetchUserDetails }) {
@@ -24,7 +25,8 @@ function Dashboard({ user, spaceUsed, allocatedSpace, logout, token, fetchUserDe
         });
         setFiles(response.data);
         } catch (error) {
-        console.error('Error fetching files', error);
+            toast.error(error.response.data)
+            console.error('Error fetching files', error);
         }
     };
 

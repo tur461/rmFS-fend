@@ -19,21 +19,21 @@ const toDenom = bytes => {
   const login_url = _ => `${BASE_URL}${URL_PATH.USER_LOGIN}`;
   const register_url = _ => `${BASE_URL}${URL_PATH.USER_REGISTER}`;
   const download_by_fid_url = f_id => `${BASE_URL}${URL_PATH.DWN_FILE_BY_FILE_ID}${f_id}`;
+  const user_by_uid_url = user_id => `${BASE_URL}${URL_PATH.GET_USER_BY_USER_ID}${user_id}`;
   const files_by_uid_url = user_id => `${BASE_URL}${URL_PATH.GET_FILES_BY_USER_ID}${user_id}`;
   const create_by_uid_url = user_id => `${BASE_URL}${URL_PATH.CRE_FILE_BY_USER_ID}${user_id}`;
-  const user_by_uid_url = user_id => `${BASE_URL}${URL_PATH.GET_USER_BY_USER_ID}${user_id}`;
-  const delete_by_compid_url = comp_id => `${BASE_URL}${URL_PATH.DEL_FILE_BY_COMP_ID}${comp_id}`;
+  const delete_by_fid_url = file_id => `${BASE_URL}${URL_PATH.DEL_FILE_BY_FILE_ID}${file_id}`;
 
 export {
     toMB,
     toDenom,
     truncFname,
-    
+
     login_url,
     register_url,
     user_by_uid_url,
     files_by_uid_url,
     create_by_uid_url,
+    delete_by_fid_url,
     download_by_fid_url,
-    delete_by_compid_url,
 }

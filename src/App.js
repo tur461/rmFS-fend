@@ -38,6 +38,7 @@ function App() {
         // toast.error('Err!. [code: ' + response.status +  ']');
       }
     } catch (error) {
+      toast.error(error.response.data)
       console.error('Error fetching user details', error);
     }
   };
@@ -57,7 +58,8 @@ function App() {
         toast.error('Err!. [code: ' + response.status +  ']');
       }
     } catch (error) {
-
+      toast.error('Login failed.')
+      toast.error(error.response.data)
       console.error('Login failed', error);
     }
   };
@@ -69,6 +71,7 @@ function App() {
       toast.success('Registered successfully.')
     } catch (error) {
       toast.error('Registration failed.')
+      toast.error(error.response.data)
       console.error('Registration failed', error);
     }
   };

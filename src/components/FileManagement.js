@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import { create_by_uid_url, delete_by_compid_url, download_by_fid_url, toDenom, truncFname } from '../utils';
+import { create_by_uid_url, delete_by_fid_url, download_by_fid_url, toDenom, truncFname } from '../utils';
 
 function FileManagement({ files, token, fetchFiles, fetchUserDetails, user_id }) {
     const fileInputRef = useRef(null);
@@ -46,7 +46,7 @@ function FileManagement({ files, token, fetchFiles, fetchUserDetails, user_id })
             } catch (error) {
                 console.log('LOAD ID:', loadID)
                 toast.update(loadID, {render: "Something went wrong.", type: "error", isLoading: !1, autoClose: 5000});
-                toast.error('Failed: ' + error.response.data);
+                toast.error(error.response.data);
                 console.error('Error uploading file', error);
             }
         } else {
@@ -56,14 +56,15 @@ function FileManagement({ files, token, fetchFiles, fetchUserDetails, user_id })
 
     const deleteFile = async (id) => {
         try {
-            await axios.delete(delete_by_compid_url(`${user_id}__${id}`), {
+            await axios.delete(delete_by_fid_url(`${id}`), {
                 headers: { Authorization: `Bearer ${token}` },
             });
             toast.success('File deleted successfully!');
             fetchFiles();
             fetchUserDetails(user_id)
         } catch (error) {
-            toast.error('Failed to delete file.');
+            toast.error('Failed to delete the file.');
+            toast.error(error.response.data)
             console.error('Error deleting file', error);
         }
     };
@@ -104,7 +105,8 @@ function FileManagement({ files, token, fetchFiles, fetchUserDetails, user_id })
             // fetchUserDetails(user_id)
         } catch (error) {
             toast.update(loadID, {render: "Something went wrong.", type: "error", isLoading: !1, autoClose: 5000});
-            toast.error('Failed to delete file.');
+            toast.error('Failed to download the file.');
+            toast.error(error.response.data)
             console.error('Error deleting file', error);
         }
     };
