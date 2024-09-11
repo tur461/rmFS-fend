@@ -1,7 +1,8 @@
 import React, { useRef, useState } from 'react';
 import { toast } from 'react-toastify';
-import { createDownloadLinkFor, toDenom, truncFname } from '../utils';
+import { createDownloadLinkFor, encFile, toDenom, truncFname } from '../utils';
 import FileAPIService from '../services/FileApiService';
+import { MISC } from '../constants';
 
 function FileManagement({ files, token, fetchFiles, fetchUserDetails, userId }) {
     const fileInputRef = useRef(null);
@@ -14,10 +15,18 @@ function FileManagement({ files, token, fetchFiles, fetchUserDetails, userId }) 
 
     const createFile = async () => {
         if (selectedFile) {
-            const formData = new FormData();
-            formData.append('file', selectedFile);
+            const secret = MISC.ENC_KEY
+            const { encContent, iv } = await encFile(selectedFile, secret);
+            console.log('enc content:', encContent)
+            const encBlob = new Blob([encContent], { type: selectedFile.type });
             
+            const formData = new FormData();
+
+            formData.append('file', encBlob, selectedFile.name);
+            formData.append('ivector', JSON.stringify(Array.from(iv)))
+
             const good = await FileAPIService.getInst(token).uploadFile(formData, userId)
+
             if(good) {
                 setFileName('');
                 setSelectedFile(null);
@@ -42,7 +51,7 @@ function FileManagement({ files, token, fetchFiles, fetchUserDetails, userId }) 
     const downloadFile = async fileId => {
         const res = await FileAPIService.getInst(token).downloadFile(fileId)
         if(res) {
-            createDownloadLinkFor(res.data, res.headers)
+            await createDownloadLinkFor(res.data, res.headers)
         }
     };
 

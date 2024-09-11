@@ -6,9 +6,11 @@ import FileAPIService from '../services/FileApiService';
 
 function Dashboard({ user, spaceUsed, allocatedSpace, logout, token, fetchUserDetails }) {
     const [files, setFiles] = useState([]);
-    
+
     useEffect(() => {
-        user && fetchFiles();
+        if(user) {
+            fetchFiles();
+        }
     }, [user]);
 
     const fetchFiles = async () => {

@@ -1,6 +1,6 @@
 import axios from "axios";
 import { toast } from "react-toastify";
-import { create_by_uid_url, delete_by_fid_url, download_by_fid_url, files_by_uid_url } from "../utils";
+import { create_by_uid_url, decFile, delete_by_fid_url, download_by_fid_url, files_by_uid_url } from "../utils";
 
 export default class FileAPIService {
     static inst = null
@@ -85,6 +85,7 @@ export default class FileAPIService {
 
             if(resp.status >= 200 && resp.status <= 300) {
                 toast.update(loadID, {render: "Download Completed.", type: "success", isLoading: !1, autoClose: 5000});
+                
                 return {
                     data: resp.data, 
                     headers: resp.headers

@@ -11,8 +11,18 @@ const URL_PATH = {
 
 }
 
+const MISC = {
+    ALGO: {
+        AES_ECB: 'AES-ECB', // weak
+        AES_GCM: 'AES-GCM', // strong
+    },
+    ENC_KEY: 'the quick grey cat jumped over the lazy brown mice',
+
+}
+
 
 export {
+    MISC,
     BASE_URL,
     URL_PATH
 }
